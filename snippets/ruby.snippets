@@ -555,7 +555,7 @@ snippet defupdate
 		if @$1.update_attributes(params[:$1])
 			flash[:notice] = "$2 was successfully updated."
 		end
-		response_with @$1
+		respond_with @$1
 	end${3}
 snippet flash
 	flash[:${1:notice}] = "${2}"
@@ -836,46 +836,46 @@ snippet after
 	end
 snippet controller
 	class Controller < ApplicationController
-	  respond_to :html, :json
+		respond_to :html, :json
 
-	  def index
-		@${1:model_class_name} = ${2:ModelClassName}.all
-		respond_with @$1
-	  end
-
-	  def show
-		@$1 = $2.find(params[:id])
-		respond_with @$1
-	  end
-
-	  def new
-		@$1 = $2.new
-		respond_with @$1
-	  end
-
-	  def edit
-		@$1 = $2.find(params[:id])
-	  end
-
-	  def create
-		@$1 = $2.new(params[:$1])
-		if @$1.save
-		  flash[:notice] = "$2 was successfully created."
+		def index
+			@${1:model_class_name} = ${2:ModelClassName}.all
+			respond_with @$1
 		end
-		respond_with @$1
-	  end
 
-	  def update
-		@$1 = $2.find(params[:id])
-		if @$1.update_attributes(params[:$1])
-		  flash[:notice] = "$2 was successfully updated."
+		def show
+			@$1 = $2.find(params[:id])
+			respond_with @$1
 		end
-		response_with @$1
-	  end
 
-	  def destroy
-		@$1 = $2.find(params[:id])
-		@$1.destroy
-		respond_with @$1
-	  end
+		def new
+			@$1 = $2.new
+			respond_with @$1
+		end
+
+		def edit
+			@$1 = $2.find(params[:id])
+		end
+
+		def create
+			@$1 = $2.new(params[:$1])
+			if @$1.save
+				flash[:notice] = "$2 was successfully created."
+			end
+			respond_with @$1
+		end
+
+		def update
+			@$1 = $2.find(params[:id])
+			if @$1.update_attributes(params[:$1])
+				flash[:notice] = "$2 was successfully updated."
+			end
+			respond_with @$1
+		end
+
+		def destroy
+			@$1 = $2.find(params[:id])
+			@$1.destroy
+			respond_with @$1
+		end
 	end
