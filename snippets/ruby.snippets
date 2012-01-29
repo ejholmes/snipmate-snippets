@@ -72,11 +72,7 @@ snippet until
 	until ${1:condition}
 		${2}
 	end
-snippet cla class .. end
-	class ${1:`substitute(Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`}
-		${2}
-	end
-snippet cla class .. initialize .. end
+snippet class
 	class ${1:`substitute(Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`}
 		def initialize(${2:args})
 			${3}
@@ -84,64 +80,9 @@ snippet cla class .. initialize .. end
 
 
 	end
-snippet cla class .. < ParentClass .. initialize .. end
-	class ${1:`substitute(Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < ${2:ParentClass}
-		def initialize(${3:args})
-			${4}
-		end
-
-
-	end
-snippet cla ClassName = Struct .. do .. end
-	${1:`substitute(Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} = Struct.new(:${2:attr_names}) do
-		def ${3:method_name}
-			${4}
-		end
-
-
-	end
-snippet cla class BlankSlate .. initialize .. end
-	class ${1:BlankSlate}
-		instance_methods.each { |meth| undef_method(meth) unless meth =~ /\A__/ }
-snippet cla class << self .. end
-	class << ${1:self}
-		${2}
-	end
-# class .. < DelegateClass .. initialize .. end
-snippet cla-
-	class ${1:`substitute(Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`} < DelegateClass(${2:ParentClass})
-		def initialize(${3:args})
-			super(${4:del_obj})
-
-			${5}
-		end
-
-
-	end
-snippet mod module .. end
+snippet module module .. end
 	module ${1:`substitute(Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`}
 		${2}
-	end
-snippet mod module .. module_function .. end
-	module ${1:`substitute(Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`}
-		module_function
-
-		${2}
-	end
-snippet mod module .. ClassMethods .. end
-	module ${1:`substitute(Filename(), '\(_\|^\)\(.\)', '\u\2', 'g')`}
-		module ClassMethods
-			${2}
-		end
-
-		module InstanceMethods
-
-		end
-
-		def self.included(receiver)
-			receiver.extend         ClassMethods
-			receiver.send :include, InstanceMethods
-		end
 	end
 # attr_reader
 snippet r
@@ -578,27 +519,16 @@ snippet crw
 snippet defcreate
 	def create
 		@${1:model_class_name} = ${2:ModelClassName}.new(params[:$1])
-	
-		respond_to do |wants|
-			if @$1.save
-				flash[:notice] = '$2 was successfully created.'
-				wants.html { redirect_to(@$1) }
-				wants.xml  { render :xml => @$1, :status => :created, :location => @$1 }
-			else
-				wants.html { render :action => "new" }
-				wants.xml  { render :xml => @$1.errors, :status => :unprocessable_entity }
-			end
+		if @$1.save
+			flash[:notice] = "$2 was successfully created."
 		end
+		respond_with @$1
 	end${3}
 snippet defdestroy
 	def destroy
 		@${1:model_class_name} = ${2:ModelClassName}.find(params[:id])
 		@$1.destroy
-	
-		respond_to do |wants|
-			wants.html { redirect_to($1s_url) }
-			wants.xml  { head :ok }
-		end
+		respond_with @$1
 	end${3}
 snippet defedit
 	def edit
@@ -607,44 +537,25 @@ snippet defedit
 snippet defindex
 	def index
 		@${1:model_class_name} = ${2:ModelClassName}.all
-	
-		respond_to do |wants|
-			wants.html # index.html.erb
-			wants.xml  { render :xml => @$1s }
-		end
+		respond_with @$1
 	end${3}
 snippet defnew
 	def new
 		@${1:model_class_name} = ${2:ModelClassName}.new
-	
-		respond_to do |wants|
-			wants.html # new.html.erb
-			wants.xml  { render :xml => @$1 }
-		end
+		respond_with @$1
 	end${3}
 snippet defshow
 	def show
 		@${1:model_class_name} = ${2:ModelClassName}.find(params[:id])
-	
-		respond_to do |wants|
-			wants.html # show.html.erb
-			wants.xml  { render :xml => @$1 }
-		end
+		respond_with @$1
 	end${3}
 snippet defupdate
 	def update
 		@${1:model_class_name} = ${2:ModelClassName}.find(params[:id])
-	
-		respond_to do |wants|
-			if @$1.update_attributes(params[:$1])
-				flash[:notice] = '$2 was successfully updated.'
-				wants.html { redirect_to(@$1) }
-				wants.xml  { head :ok }
-			else
-				wants.html { render :action => "edit" }
-				wants.xml  { render :xml => @$1.errors, :status => :unprocessable_entity }
-			end
+		if @$1.update_attributes(params[:$1])
+			flash[:notice] = "$2 was successfully updated."
 		end
+		response_with @$1
 	end${3}
 snippet flash
 	flash[:${1:notice}] = "${2}"
@@ -922,4 +833,49 @@ snippet before
 snippet after
 	after(:${1:each}) do
 		${2}
+	end
+snippet controller
+	class Controller < ApplicationController
+	  respond_to :html, :json
+
+	  def index
+		@${1:model_class_name} = ${2:ModelClassName}.all
+		respond_with @$1
+	  end
+
+	  def show
+		@$1 = $2.find(params[:id])
+		respond_with @$1
+	  end
+
+	  def new
+		@$1 = $2.new
+		respond_with @$1
+	  end
+
+	  def edit
+		@$1 = $2.find(params[:id])
+	  end
+
+	  def create
+		@$1 = $2.new(params[:$1])
+		if @$1.save
+		  flash[:notice] = "$2 was successfully created."
+		end
+		respond_with @$1
+	  end
+
+	  def update
+		@$1 = $2.find(params[:id])
+		if @$1.update_attributes(params[:$1])
+		  flash[:notice] = "$2 was successfully updated."
+		end
+		response_with @$1
+	  end
+
+	  def destroy
+		@$1 = $2.find(params[:id])
+		@$1.destroy
+		respond_with @$1
+	  end
 	end
